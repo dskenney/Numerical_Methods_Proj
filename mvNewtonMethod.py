@@ -72,7 +72,7 @@ def plasticity(x):  # solves using yield function and isotropic hardening equati
     R_s = c[17] * jnp.exp(-c[18] / T)
     beta = v * jnp.arcsinh(delta_eps_p/time_step/f)
     F1 = sigma_tr-kappa_tr-beta # yield function
-    F2 = kappa_n-(R_d*delta_eps_p+R_s*time_step)*kappa_n1-kappa_n1
+    F2 = kappa_n-(R_d*delta_eps_p+R_s*time_step)*kappa_n1**2-kappa_n1
     return [F1, F2]
     
 
