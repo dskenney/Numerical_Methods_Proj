@@ -31,6 +31,7 @@ t_step = 1          # Time step [seconds]
 T = 296             # Temperature [Kelvin] (23°C)
 C = jnp.ones(19)
 sigma_tr_n = 0                            # Initial value of trial stress (should be zero)
+mu = 1                                      # Shear modulus [GPa] (guess value)
 
 # OUTPUT: Array of dependent Results res = [f0, f1, ..., fn]
 #   Outputs will be arrays of strain and stress data to be plotted
@@ -48,11 +49,12 @@ sigma_tr_n = 0                            # Initial value of trial stress (shoul
 
 def radialReturn():
     # First making Elastic prediction
-    mu = 1                                      # Shear modulus [GPa] (guess value)
-    delta_eps_e = 0.001                         # Elastic strain increment (guess value)
+    delta_eps_e = eps_dot*time_step             # Elastic strain increment
     delta_sigma_tr = 2*mu*delta_eps_e           # Equation given by Dr. Cho
     sigma_tr_n1 = sigma_tr_n + delta_sigma_tr   # Stress at next iteration is equal to stress at current iteration plus a change in stress
-    Y_f = kappa_tr+beta                                     # Yield function. Should be a function of stress, ISV's, and strain rate
+    kappa_tr = kappa_n-(R_d*delta_eps_p+R_s*time_step)
+    beta = v * jnp.arcsinh(delta_eps_p/time_step/f)
+    Y_f = sigma_tr-kappa_tr-beta                                    # Yield function. Should be a function of stress, ISV's, and strain rate
     if Y_f <= 0:            # If less than zero, deformation is purely elastic
         sigma_tr_n1 = sigma_tr_n + delta_sigma_tr   # Stress at next iteration is equal to stress at current iteration plus a change in stress
         delta_eps = delta_eps_e                     # Total strain is equal to the elastic strain
@@ -88,9 +90,8 @@ def multivariateNewton(f, x0, tol, N):
     for i in range(1,N):            # Start Loop for Maximum Iterations
         x = jnp.subtract(x0, jnp.matmul(J_inv(x0), f(x0).T)) # Perform Newton Iteration: x_{n+1} = x_n-J^(-1)*f
         # reltol = jnp.divide(jnp.linalg.norm(jnp.subtract(x,x0), np.inf),jnp.linalg.norm(x, np.inf)) # Calculate: ||x_{n+1}-x_n||/||x_{n+1}||
-        reltol = jnp.linalg.norm(jnp.subtract(x,x0), np.inf) # Calculate: ||x_{n+1}-x_n||/||x_{n+1}||
-
-        print(i, reltol)            # Print iteration and relTol
+        tol = jnp.linalg.norm(jnp.subtract(x,x0), np.inf) # Calculate: ||x_{n+1}-x_n||/||x_{n+1}||
+        print(i, tol)               # Print iteration and relTol
         if reltol < tol:            # Check for convergence
             print(x)                # Print Result
             return x                # Return Result 
