@@ -29,11 +29,8 @@ import timeit
 eps_dot = 10        # Strain Rate in Units [mm/s]
 t_step = 1          # Time step [seconds]
 T = 296             # Temperature [Kelvin] (23°C)
-C_1 = 1
-C_2 = 1
-C_3 = 1
-C_4 = 1
-C_5 = 1
+C = jnp.ones(19)
+sigma_tr_n = 0                            # Initial value of trial stress (should be zero)
 
 # OUTPUT: Array of dependent Results res = [f0, f1, ..., fn]
 #   Outputs will be arrays of strain and stress data to be plotted
@@ -51,12 +48,11 @@ C_5 = 1
 
 def radialReturn():
     # First making Elastic prediction
-    sigma_tr_n_0 = 0                            # Initial value of trial stress (should be zero)
     mu = 1                                      # Shear modulus [GPa] (guess value)
     delta_eps_e = 0.001                         # Elastic strain increment (guess value)
     delta_sigma_tr = 2*mu*delta_eps_e           # Equation given by Dr. Cho
     sigma_tr_n1 = sigma_tr_n + delta_sigma_tr   # Stress at next iteration is equal to stress at current iteration plus a change in stress
-    Y_f = ?                                     # Yield function. Should be a function of stress, ISV's, and strain rate
+    Y_f = kappa_tr+beta                                     # Yield function. Should be a function of stress, ISV's, and strain rate
     if Y_f <= 0:            # If less than zero, deformation is purely elastic
         sigma_tr_n1 = sigma_tr_n + delta_sigma_tr   # Stress at next iteration is equal to stress at current iteration plus a change in stress
         delta_eps = delta_eps_e                     # Total strain is equal to the elastic strain
@@ -65,9 +61,17 @@ def radialReturn():
         
     return
 
-
-def functions():
-    return
+def plasticity(x):  # solves using yield function and isotropic hardening equation
+    delta_eps_p, kappa_n1 = x
+    V = c[1] * jnp.exp(-c[2] / T)
+    f = c[5] * jnp.exp(-c[6] / T)
+    R_d = c[13] * jnp.exp(-c[14] / T)
+    H = c[15] - c[16] * T
+    R_s = c[17] * jnp.exp(-c[18] / T)
+    beta = v * jnp.arcsinh(delta_eps_p/time_step/f)
+    F1 = sigma_tr-kappa_tr-beta # yield function
+    F2 = kappa_n-(R_d*delta_eps_p+R_s*time_step)*kappa_n1-kappa_n1
+    return [F1, F2]
     
 
 ## Define Multivariate Newton Method
@@ -95,5 +99,3 @@ def multivariateNewton(f, x0, tol, N):
 
 res = multivariateNewton(fs, [1.,1.,1.], 1e-8, 20) # Perform Newton Method for System "fs" with guess  [x0,x1,x2] = [1,1,1] with tol = 1e-8 and 20 maximum iterations
 print(fs(res))  # Print fs output for system
-
-kappa\
