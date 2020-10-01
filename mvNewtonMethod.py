@@ -50,7 +50,7 @@ mu = 1                                      # Shear modulus [GPa] (guess value)
 def radialReturn():
     # First making Elastic prediction
     delta_eps_e = eps_dot*time_step             # Elastic strain increment
-    delta_sigma_tr = 2*mu*delta_eps_e           # Equation given by Dr. Cho
+    delta_sigma_tr = 2*mu*delta_eps_e           # Hooke's Law (2*mu = E)
     sigma_tr_n1 = sigma_tr_n + delta_sigma_tr   # Stress at next iteration is equal to stress at current iteration plus a change in stress
     kappa_tr = kappa_n-(R_d*delta_eps_p+R_s*time_step)*kappa_n1**2
     beta = v * jnp.arcsinh(delta_eps_p/time_step/f)
