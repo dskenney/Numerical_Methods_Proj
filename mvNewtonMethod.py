@@ -26,8 +26,10 @@ import timeit
 # INPUT: Array of independent variables x = [x0,x1,...,xn]
 #   Inputs will be strain rate (eps_dot), time step (t_step), and temperature (T)
 #   along with other material constants (C_1 to C_n)
-eps_dot = 10        # Strain Rate in Units [mm/s]
-t_step = 1          # Time step [seconds]
+eps_dot = 10        # Strain Rate in Units [1/s]
+perc_elong = 15
+N_partitions = 25
+t_step = perc_elong/(eps_dot*100)/N_partitions          # Time step [seconds]
 T = 296             # Temperature [Kelvin] (23°C)
 C = jnp.ones(19)
 sigma_tr_n = 0                            # Initial value of trial stress (should be zero)
