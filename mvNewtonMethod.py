@@ -100,5 +100,5 @@ def multivariateNewton(f, x0, tol, N):
         x0 = x                      # Update x0 for Next iteration
     print("Failed to converge")     # Print Message if Convergence did not occur
 
-res = multivariateNewton(fs, [1.,1.,1.], 1e-8, 20) # Perform Newton Method for System "fs" with guess  [x0,x1,x2] = [1,1,1] with tol = 1e-8 and 20 maximum iterations
+res = multivariateNewton(fs, [1.,1.,1.], 1e-8, N) # Perform Newton Method for System "fs" with guess  [x0,x1,x2] = [1,1,1] with tol = 1e-8 and N maximum iterations
 print(fs(res))  # Print fs output for system
