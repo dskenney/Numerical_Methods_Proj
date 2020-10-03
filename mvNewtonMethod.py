@@ -62,7 +62,6 @@ def radialReturn():
         delta_eps = delta_eps_e                     # Total strain is equal to the elastic strain
     else:                   # If yield function greater than zero, plasticity occurs. Must solve for plastic strain numerically
             # (reference the N-R method function here so solve plastic strain)
-        
     return
 
 def plasticity(x):  # solves using yield function and isotropic hardening equation
