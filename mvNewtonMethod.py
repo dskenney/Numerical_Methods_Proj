@@ -2,18 +2,18 @@
 #    Numerical Methods ISV Model Using Newton-Raphson Method
 # --------------------------------------------------------------
 
-# Description: 
+# Description:
 # This model utilizes a set of material constants (C_n through C_m)
 # along with inputs of strain rate and time step to calculate and predict
-# an accurate stress-strain curve for that given material. This is a 
+# an accurate stress-strain curve for that given material. This is a
 # viscoplastic model (strain-rate sensitive) that uses a Radial-Return
 # scheme to predict deformation elastically, and then correct for any plastic
 # deformation that also occurs. Plastic deformation behavior is governed by
 # the Flow Rule and Isotropic Hardening. These equations may be solved either
 # analytically or numerically (using the Newton-Raphson (N-R) method). The analytical
-# method will be solved first, requiring a much smaller time step for 
-# accuracy, while the N-R method is solved second which retains accuracy at 
-# much greater time steps. The two methods are then compared and tested to 
+# method will be solved first, requiring a much smaller time step for
+# accuracy, while the N-R method is solved second which retains accuracy at
+# much greater time steps. The two methods are then compared and tested to
 # optimize time step, computational time, and accuracy of the resulting curve.
 
 ## Import Packages
@@ -21,7 +21,7 @@ import numpy as np
 import jax
 import jax.numpy as jnp
 from jax import jit, vmap, grad
-import timeit 
+import timeit
 ## Define System of Equations
 # INPUT: Array of independent variables x = [x0,x1,...,xn]
 #   Inputs will be strain rate (eps_dot), time step (t_step), and temperature (T)
@@ -55,7 +55,7 @@ def radialReturn():
     delta_sigma_tr = 2*mu*delta_eps_e           # Hooke's Law (2*mu = E)
     sigma_tr_n1 = sigma_tr_n + delta_sigma_tr   # Stress at next iteration is equal to stress at current iteration plus a change in stress
     kappa_tr = kappa_n-(R_d*delta_eps_p+R_s*time_step)*kappa_n1**2
-    beta = v * jnp.arcsinh(delta_eps_p/time_step/f)
+    beta = V * jnp.arcsinh(delta_eps_p/time_step/f)
     Y_f = sigma_tr-kappa_tr-beta                                    # Yield function. Should be a function of stress, ISV's, and strain rate
     if Y_f <= 0:            # If less than zero, deformation is purely elastic
         sigma_tr_n1 = sigma_tr_n + delta_sigma_tr   # Stress at next iteration is equal to stress at current iteration plus a change in stress
@@ -71,18 +71,18 @@ def plasticity(x):  # solves using yield function and isotropic hardening equati
     R_d = c[13] * jnp.exp(-c[14] / T)
     H = c[15] - c[16] * T
     R_s = c[17] * jnp.exp(-c[18] / T)
-    beta = v * jnp.arcsinh(delta_eps_p/time_step/f)
+    beta = V * jnp.arcsinh(delta_eps_p/time_step/f)
     F1 = sigma_tr-kappa_tr-beta # yield function
     F2 = kappa_n-(R_d*delta_eps_p+R_s*time_step)*kappa_n1**2-kappa_n1
     return [F1, F2]
-    
+
 
 ## Define Multivariate Newton Method
 # INPUT: System of Functions = f, Initial Guess Array = x0, tolerance = tol, Maximum iterations = N
 # OUTPUT: Solution Array = x
 def multivariateNewton(f, x0, tol, N):
     x0 = jnp.asarray(x0).T          # Convert Input Array to Jax Array
-    def J_inv(x):                   # Create Inverse Jacobian Function 
+    def J_inv(x):                   # Create Inverse Jacobian Function
         jacobian = jax.jacfwd(f)    # Calculate the jacobian function from the provided systems with Forward Auto-differentiation
         J = jacobian(x)             # Calculate the Jacobian at x
         J_inv = jnp.linalg.inv(J)   # Calculate the Inverse Jacobian
@@ -95,7 +95,7 @@ def multivariateNewton(f, x0, tol, N):
         print(i, tol)               # Print iteration and relTol
         if reltol < tol:            # Check for convergence
             print(x)                # Print Result
-            return x                # Return Result 
+            return x                # Return Result
         x0 = x                      # Update x0 for Next iteration
     print("Failed to converge")     # Print Message if Convergence did not occur
 
