@@ -100,7 +100,7 @@ def radialReturn(sigma_n, delta_eps_p_n, kappa_n):          # Defines function i
         sigma_n1 = sigma_tr                     # Stress at next iteration is equal to stress at current iteration plus a change in stress
         delta_eps = delta_eps_e  # Total strain is equal to the elastic strain
         kappa_n1 = kappa_tr
-        delta_eps_p_n1 = delta_eps
+        delta_eps_p_n1 = 0        # elastic region -> 0 plastic strain
         print("ELASTIC")
     else:                                       # If yield function greater than zero, plasticity occurs. Must solve for plastic strain numerically
         # (reference the N-R method function here so solve plastic strain)
@@ -167,7 +167,7 @@ for n in range(0,N_partitions):     # nth timestep partition of strain subdivisi
     print(sigma_n)
     # print(delta_eps_p_n)
     print(n)
-plt.plot(range(0, N_partitions + 1), sigma_n)
+plt.plot(range(0, N_partitions + 1)*time_step/eps_dot, sigma_n)
 plt.show()
 ## End of Document
 # that's all folks!
